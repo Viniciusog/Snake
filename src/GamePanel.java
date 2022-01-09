@@ -12,7 +12,7 @@ public class GamePanel extends JPanel implements ActionListener {
     static final int SCREEN_WIDTH = 600;
     static final int SCREEN_HEIGHT = 600;
     // Tamanho dos objetos no nosso jogo
-    static final int UNIT_SIZE = 50;
+    static final int UNIT_SIZE = 25;
     // Quantidade de objeto que podem caber dentro da nossa tela
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT)/UNIT_SIZE;
     static final int DELAY = 75;
@@ -38,13 +38,14 @@ public class GamePanel extends JPanel implements ActionListener {
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
         startGame();
-        timer.start();
     }
 
     public void startGame() {
         newApple();
         running = true;
-        timer = new Timer(DELAY, this);
+        timer = new Timer(DELAY, this); // this executa o action performed]
+        timer.start();
+
     }
 
     public void paintComponent(Graphics g) {
@@ -59,8 +60,22 @@ public class GamePanel extends JPanel implements ActionListener {
                 g.drawLine(0, i*UNIT_SIZE, SCREEN_WIDTH, i*UNIT_SIZE);
         }
 
+        // Desenhar maçã
         g.setColor(Color.RED);
         g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
+
+        // Desenhar a cobra
+        for (int i = 0; i < bodyParts; i++) {
+            // Cabeça da cobra
+            if (i == 0) {
+                g.setColor(Color.green);
+            }
+            // Corpo da cobra
+            else {
+                g.setColor(new Color(45, 180, 0));
+            }
+            g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+        }
     }
 
     public void newApple() {
@@ -78,7 +93,32 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void move() {
+        System.out.println("move");
+        // Muda a direção do corpo da cobra
+        for (int i = bodyParts; i > 0; i--) {
+            x[i] = x[i-1];
+            y[i] = y[i-1];
+        }
 
+        // Muda a posição da cabeça da cobra (Obs: não pode mudar para a direção inversa da direção atual)
+        switch (direction) {
+            //Cima
+            case 'U':
+                y[0] = y[0] - UNIT_SIZE;
+                break;
+            // Esquerda
+            case 'L':
+                x[0] = x[0] - UNIT_SIZE;
+                break;
+            // Direita
+            case 'R':
+                x[0] = x[0] + UNIT_SIZE;
+                break;
+            // Baixo
+            case 'D':
+                y[0] = y[0] + UNIT_SIZE;
+                break;
+        }
     }
 
     public void checkApple() {
@@ -95,6 +135,13 @@ public class GamePanel extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (running) {
+            move();
+            checkApple();
+            checkCollisions();
+        }
+
+        repaint();
 
     }
 
