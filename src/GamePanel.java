@@ -15,7 +15,9 @@ public class GamePanel extends JPanel implements ActionListener {
     static final int UNIT_SIZE = 25;
     // Quantidade de objeto que podem caber dentro da nossa tela
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT)/UNIT_SIZE;
-    static final int DELAY = 25;
+    static final int DELAY = 75;
+    static final int SCORE_SIZE = 40;
+    static final int GAME_OVER_SIZE = 75;
     // A nossa cobra pode ocupar todos os quadrados da tela, portanto, o tamanho máximo da cobra
     // é o valor máximo de quadrados
     final int x[] = new int[GAME_UNITS];
@@ -28,8 +30,6 @@ public class GamePanel extends JPanel implements ActionListener {
     boolean running = false;
     Timer timer;
     Random random;
-
-
 
     GamePanel() {
         random = new Random();
@@ -54,26 +54,32 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void draw(Graphics g) {
-        for (int i = 0; i < SCREEN_HEIGHT/UNIT_SIZE; i++) {
+
+        if (running) {
+            for (int i = 0; i < SCREEN_HEIGHT/UNIT_SIZE; i++) {
                 g.drawLine(i*UNIT_SIZE, 0, i*UNIT_SIZE, SCREEN_HEIGHT);
                 g.drawLine(0, i*UNIT_SIZE, SCREEN_WIDTH, i*UNIT_SIZE);
-        }
-
-        // Desenhar maçã
-        g.setColor(Color.RED);
-        g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
-
-        // Desenhar a cobra
-        for (int i = 0; i < bodyParts; i++) {
-            // Cabeça da cobra
-            if (i == 0) {
-                g.setColor(Color.green);
             }
-            // Corpo da cobra
-            else {
-                g.setColor(new Color(45, 180, 0));
+
+            // Desenhar maçã
+            g.setColor(Color.RED);
+            g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
+
+            // Desenhar a cobra
+            for (int i = 0; i < bodyParts; i++) {
+                // Cabeça da cobra
+                if (i == 0) {
+                    g.setColor(Color.green);
+                }
+                // Corpo da cobra
+                else {
+                    g.setColor(new Color(45, 180, 0));
+                }
+                g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
             }
-            g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+            showScore(g);
+        } else {
+            gameOver(g);
         }
     }
 
@@ -124,11 +130,22 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public void checkApple() {
 
+        // Verifica se cabeça da cobra pegou maçã
+        if (x[0] == appleX && y[0] == appleY) {
+            applesEaten++;
+            bodyParts++;
+            newApple();
+        }
     }
 
     public void checkCollisions() {
-        // Verifica se colidiu com o próprio corpo
-        for (int i = bodyParts; i > 0; i--) {
+        // Verifica se colidiu com o próprio corpo.
+        // Precisa começar com bodyParts - 1 pois estamos, na parte de mover, movendo 1 bloco a mais do que o tamanho
+        // normal da cobra. Nesse caso, se o tamanho da cobra é 6, então mostramos na tela as posições de 0 a 5.
+        // Porém, estamos movendo da posição 0 até 6.
+        // Portanto, aqui na parte de verificar colisões, precisamos verificar apenas a parte que é mostrada na tela,
+        // ou seja, considerar apenas as posições de 0 a 5 ( 0 até bodyParts - 1)
+        for (int i = bodyParts-1; i > 0; i--) {
             if (x[0] == x[i] && y[0] == y[i]) {
                 running = false;
             }
@@ -159,7 +176,19 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void gameOver(Graphics g) {
+        g.setColor(Color.red);
+        g.setFont(new Font("Ink Free", Font.BOLD, GAME_OVER_SIZE));
+        FontMetrics metrics = getFontMetrics(g.getFont());
+        g.drawString("Game over", (SCREEN_WIDTH - metrics.stringWidth("Game over"))/2, SCREEN_HEIGHT / 2);
 
+        showScore(g);
+    }
+
+    public void showScore(Graphics g) {
+        g.setColor(Color.red);
+        g.setFont(new Font("Ink Free", Font.BOLD, SCORE_SIZE));
+        FontMetrics metrics = getFontMetrics(g.getFont());
+        g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten))/2, SCORE_SIZE);
     }
 
     // Será executado a cada DELAY segundos
@@ -173,6 +202,7 @@ public class GamePanel extends JPanel implements ActionListener {
             checkApple();
             checkCollisions();
         }
+
         repaint();
     }
 
