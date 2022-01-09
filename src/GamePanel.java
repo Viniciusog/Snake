@@ -15,7 +15,7 @@ public class GamePanel extends JPanel implements ActionListener {
     static final int UNIT_SIZE = 25;
     // Quantidade de objeto que podem caber dentro da nossa tela
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT)/UNIT_SIZE;
-    static final int DELAY = 75;
+    static final int DELAY = 25;
     // A nossa cobra pode ocupar todos os quadrados da tela, portanto, o tamanho máximo da cobra
     // é o valor máximo de quadrados
     final int x[] = new int[GAME_UNITS];
@@ -51,7 +51,6 @@ public class GamePanel extends JPanel implements ActionListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         draw(g);
-
     }
 
     public void draw(Graphics g) {
@@ -79,6 +78,8 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void newApple() {
+        // todo: apenas colocar a maçã em uma posição que é diferente do corpo
+
         // O valor randômico vai de zero até o parâmetro colocado menos 1
         int randomicoX = random.nextInt((int)SCREEN_WIDTH/UNIT_SIZE);
         appleX = randomicoX * UNIT_SIZE;
@@ -126,30 +127,82 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void checkCollisions() {
+        // Verifica se colidiu com o próprio corpo
+        for (int i = bodyParts; i > 0; i--) {
+            if (x[0] == x[i] && y[0] == y[i]) {
+                running = false;
+            }
+        }
 
+        // Verifica se colidiu com a borda direita
+        if (x[0] == SCREEN_WIDTH) {
+            running = false;
+        }
+
+        // Verifica se colidiu com a borda esquerdad
+        if (x[0] < 0) {
+            running = false;
+        }
+
+        // Verifica se colidiu com a borda inferior
+        if (y[0] == SCREEN_HEIGHT) {
+            running = false;
+        }
+
+        // Verifica se colidiu com borda superior
+        if (y[0] < 0) {
+            running = false;
+        }
+        if (!running) {
+            timer.stop();
+        }
     }
 
     public void gameOver(Graphics g) {
 
     }
 
+    // Será executado a cada DELAY segundos
     @Override
     public void actionPerformed(ActionEvent e) {
         if (running) {
+            System.out.println("X head: " + x[0]);
+            System.out.println("Y head: " + y[0]);
+
             move();
             checkApple();
             checkCollisions();
         }
-
         repaint();
-
     }
 
     public class MyKeyAdapter extends KeyAdapter {
 
         @Override
         public void keyPressed(KeyEvent e) {
-            super.keyPressed(e);
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_LEFT:
+                    if (direction != 'R') {
+                        direction = 'L';
+                    }
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    if (direction != 'L') {
+                        direction = 'R';
+                    }
+                    break;
+                case KeyEvent.VK_DOWN:
+                    if (direction != 'U') {
+                        direction = 'D';
+                    }
+                    break;
+                case KeyEvent.VK_UP:
+                    if ( direction != 'D') {
+                        direction = 'U';
+                    }
+                    break;
+
+            }
         }
     }
 }
