@@ -84,19 +84,21 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void newApple() {
-        // todo: apenas colocar a maçã em uma posição que é diferente do corpo
-
         // O valor randômico vai de zero até o parâmetro colocado menos 1
-        int randomicoX = random.nextInt((int)SCREEN_WIDTH/UNIT_SIZE);
-        appleX = randomicoX * UNIT_SIZE;
-        int randomicoY = random.nextInt((int)SCREEN_HEIGHT/UNIT_SIZE);
-        appleY = randomicoY * UNIT_SIZE;
+        appleX = random.nextInt((int)SCREEN_WIDTH/UNIT_SIZE) * UNIT_SIZE;
+        appleY = random.nextInt((int)SCREEN_HEIGHT/UNIT_SIZE) * UNIT_SIZE;
 
-        System.out.println("Randômico X: " + randomicoX);
-        System.out.println("Randômico Y: " + randomicoY);
-        System.out.println("Apple X: " + appleX);
-        System.out.println("Apple Y: " + appleY);
-        System.out.println("");
+        int i = 0;
+        while (i < bodyParts) {
+            // A maçã só será mostrada na tela se a posição dela não for a do corpo da cobra
+            if (x[i] == appleX && y[i] == appleY) {
+                i = 0;
+                appleX = random.nextInt((int)SCREEN_WIDTH/UNIT_SIZE) * UNIT_SIZE;
+                appleY = random.nextInt((int)SCREEN_HEIGHT/UNIT_SIZE) * UNIT_SIZE;
+            } else {
+                i++;
+            }
+        }
     }
 
     public void move() {
